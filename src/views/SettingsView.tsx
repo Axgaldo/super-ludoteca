@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { useGames } from '../context/GamesContext'
 import { ACCENTS, FONTS, type AccentKey, type FontKey, type ThemeMode } from '../types'
-import { APP_URL, APP_VERSION, AUTHOR, REPO_URL, asset, hasBuiltInAiKey } from '../config/env'
+import { APP_URL, APP_VERSION, AUTHOR, REPO_URL, asset, hasAiProxy } from '../config/env'
 import { askAi } from '../lib/ai'
 import { cn, initials } from '../lib/utils'
 import { Button } from '../components/ui'
@@ -128,24 +128,25 @@ export default function SettingsView() {
         </div>
       </SectionCard>
 
-      {/* IA fija */}
+      {/* IA vía proxy */}
       <SectionCard title="Asistente de reglas (Gemini)">
         <div className="flex items-start gap-2">
           <IconSparkles className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
           <p className="text-sm">
-            El chat de dudas usa <span className="font-bold">Gemini</span> con una clave incluida en
-            la build: no hay nada que configurar ni que pegar.
+            El chat de dudas usa <span className="font-bold">Gemini</span> a través de un proxy
+            propio: la clave vive en Cloudflare (nunca en esta app) y no se puede extraer del
+            navegador.
           </p>
         </div>
 
         <p className="text-sm text-muted">
           Estado:{' '}
-          {hasBuiltInAiKey
-            ? '✓ configurado en esta build'
-            : '✗ sin configurar (falta VITE_GEMINI_API_KEY en el entorno de compilación)'}
+          {hasAiProxy
+            ? '✓ proxy configurado en esta build'
+            : '✗ sin configurar (falta VITE_AI_PROXY_URL; ver worker/README.md)'}
         </p>
 
-        {hasBuiltInAiKey && (
+        {hasAiProxy && (
           <div className="flex flex-wrap items-center gap-3">
             <Button size="sm" variant="primary" onClick={() => void testConnection()} disabled={testing}>
               {testing ? 'Probando…' : 'Probar conexión'}
@@ -166,10 +167,9 @@ export default function SettingsView() {
         )}
 
         <p className="text-xs text-muted">
-          Aviso: en una web estática la clave viaja dentro del JavaScript y alguien con
-          conocimientos podría extraerla. Para un uso personal es aceptable; si quieres ocultarla de
-          verdad, necesitas un proxy (p. ej. un Cloudflare Worker) que la guarde en el servidor.
-          Recomendado: restringe la clave a la API «Generative Language» en Google Cloud.
+          Cómo funciona: la app llama al Cloudflare Worker (<code className="rounded bg-elev px-1 py-0.5">worker/</code>),
+          que guarda la API key como secret cifrado y la usa para hablar con Gemini. Solo los orígenes
+          permitidos pueden llamarlo y el Worker puede limitar peticiones por IP.
         </p>
       </SectionCard>
 

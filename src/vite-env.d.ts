@@ -9,8 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET?: string
   readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string
   readonly VITE_FIREBASE_APP_ID?: string
-  /** Clave del asistente de reglas, incluida en la build */
-  readonly VITE_GEMINI_API_KEY?: string
+  /** URL del proxy de IA (Cloudflare Worker). La API key vive allí, no en la build. */
+  readonly VITE_AI_PROXY_URL?: string
 }
 
 interface ImportMeta {

@@ -1,0 +1,19 @@
+# Proxy de IA de Super Ludoteca (Cloudflare Worker)
+# Despliegue por CLI (opcional; también puedes pegar index.js en el panel web):
+#   npx wrangler deploy
+#   npx wrangler secret put GEMINI_API_KEY
+#
+# La API key NO se escribe aquí: se guarda como secret cifrado en Cloudflare.
+
+name = "super-ludoteca-ai"
+main = "index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+# Orígenes permitidos (no es secreto). Separa con comas.
+ALLOWED_ORIGINS = "https://axgaldo.github.io,http://localhost:5173,http://localhost:4173"
+
+# Opcional: rate limit por IP (40/hora). Crea un KV namespace y descomenta:
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "<id-del-namespace>"

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Game } from '../types'
 import { askAi, type ChatMessage } from '../lib/ai'
-import { hasBuiltInAiKey } from '../config/env'
+import { hasAiProxy } from '../config/env'
 import { cn } from '../lib/utils'
 import { Button, Chip } from './ui'
 import { IconSend } from './icons'
@@ -76,14 +76,17 @@ export function ChatPanel({ game }: { game: Game }) {
     }
   }
 
-  if (!hasBuiltInAiKey) {
+  if (!hasAiProxy) {
     return (
       <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
         <p className="text-sm font-bold">Asistente no disponible en esta build</p>
         <p className="mt-1 text-sm text-muted">
-          Falta la clave de Gemini. Añade <code className="rounded bg-elev px-1 py-0.5 text-xs">VITE_GEMINI_API_KEY</code>{' '}
-          al <code className="rounded bg-elev px-1 py-0.5 text-xs">.env.local</code> (o al secret{' '}
-          <code className="rounded bg-elev px-1 py-0.5 text-xs">FIREBASE_ENV</code>) y vuelve a compilar.
+          Falta la URL del proxy de IA. Despliega el Cloudflare Worker de{' '}
+          <code className="rounded bg-elev px-1 py-0.5 text-xs">worker/</code> y define{' '}
+          <code className="rounded bg-elev px-1 py-0.5 text-xs">VITE_AI_PROXY_URL</code> en el{' '}
+          <code className="rounded bg-elev px-1 py-0.5 text-xs">.env.local</code> (o en el secret{' '}
+          <code className="rounded bg-elev px-1 py-0.5 text-xs">FIREBASE_ENV</code>). La clave de
+          Gemini se guarda en Cloudflare, nunca en la app.
         </p>
       </div>
     )

@@ -1,7 +1,7 @@
 // Constantes de la aplicación y lectura segura de variables de entorno.
 
 export const APP_NAME = 'Super Ludoteca'
-export const APP_VERSION = 'v1.1.0'
+export const APP_VERSION = 'v1.2.0'
 /** Toda mención a la versión enlaza a la build desplegada (GitHub Pages). */
 export const APP_URL = 'https://axgaldo.github.io/super-ludoteca/'
 export const REPO_URL = 'https://github.com/axgaldo/super-ludoteca'
@@ -24,13 +24,14 @@ export const firebaseEnv = {
 /** ¿Están las 6 variables de Firebase configuradas? Si no, se ofrece el Modo Invitado Local. */
 export const isFirebaseConfigured = Object.values(firebaseEnv).every((v) => typeof v === 'string' && v.length > 0)
 
-// ─── Asistente de reglas (Gemini incluido en la build) ────────────────
+// ─── Asistente de reglas (proxy propio, clave fuera del navegador) ────
+// La API key de Gemini vive en el Cloudflare Worker (worker/index.js).
+// La app solo conoce la URL del proxy: la clave nunca entra en el bundle.
 
-/** Clave de Gemini incluida en el build. No se configura desde la app. */
-export const envGeminiKey = import.meta.env.VITE_GEMINI_API_KEY ?? ''
+export const aiProxyUrl = (import.meta.env.VITE_AI_PROXY_URL ?? '').trim()
 
-/** ¿La build trae clave para el chat de reglas? */
-export const hasBuiltInAiKey = envGeminiKey.length > 0
+/** ¿Esta build tiene configurado el proxy del asistente? */
+export const hasAiProxy = aiProxyUrl.length > 0
 
 /** Ruta de un asset público respetando el base path de GitHub Pages. */
 export function asset(path: string): string {
