@@ -68,3 +68,29 @@ export function difficultyDotClass(d: Difficulty): string {
     } satisfies Record<Difficulty, string>
   )[d]
 }
+
+// ─── Errores de Firestore → mensajes accionables ───────────────────────
+
+/** Traduce los códigos de Firestore a un mensaje claro en español. */
+export function describeFirestoreError(err: unknown): string {
+  const code =
+    typeof err === 'object' && err !== null && 'code' in err
+      ? String((err as { code?: unknown }).code)
+      : ''
+  if (code.includes('permission-denied')) {
+    return 'Firestore ha denegado el acceso. Publica las reglas de seguridad del README (Firebase → Firestore Database → Reglas) y vuelve a intentarlo.'
+  }
+  if (code.includes('unauthenticated')) {
+    return 'Tu sesión ha caducado. Vuelve a iniciar sesión con Google.'
+  }
+  if (code.includes('not-found') || code.includes('failed-precondition')) {
+    return 'No se encuentra la base de datos Firestore. Créala en Firebase → Firestore Database (menú Build).'
+  }
+  if (code.includes('unavailable')) {
+    return 'Sin conexión con Firestore. Revisa tu red e inténtalo de nuevo.'
+  }
+  if (code.includes('resource-exhausted')) {
+    return 'Has alcanzado el límite gratuito de Firestore. Espera un rato o revisa tu plan.'
+  }
+  return 'No se pudo conectar con Firestore. Revisa la configuración de Firebase (guía en el README).'
+}

@@ -7,7 +7,7 @@ import {
   type RepoMode,
 } from '../lib/repos'
 import { useAuth } from './AuthContext'
-import { uid } from '../lib/utils'
+import { describeFirestoreError, uid } from '../lib/utils'
 import type { Game, GameDraft } from '../types'
 
 interface SaveOptions {
@@ -20,6 +20,8 @@ interface GamesContextValue {
   games: Game[]
   loading: boolean
   mode: RepoMode | null
+  /** Error de sincronización con Firestore (null si todo va bien) */
+  error: string | null
   saveGame: (draft: GameDraft, opts?: SaveOptions) => Promise<Game>
   removeGame: (id: string) => Promise<void>
   restoreDemos: () => void
@@ -37,24 +39,29 @@ export function GamesProvider({ children }: { children: ReactNode }) {
   const mode: RepoMode | null = status === 'user' ? 'cloud' : status === 'guest' ? 'local' : null
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!mode) {
       setGames([])
       setLoading(false)
+      setError(null)
       return
     }
     setLoading(true)
+    setError(null)
     const repo: GamesRepo = mode === 'cloud' && user ? createFirestoreRepo(user.uid) : createLocalRepo()
     const unsubscribe = repo.subscribe(
       (next) => {
         setGames(sortGames(next))
         setLoading(false)
+        setError(null)
       },
-      (error) => {
-        console.error('Error al leer los juegos:', error)
+      (err) => {
+        console.error('Error al leer los juegos:', err)
         setGames([])
         setLoading(false)
+        setError(describeFirestoreError(err))
       },
     )
     return unsubscribe
@@ -70,6 +77,7 @@ export function GamesProvider({ children }: { children: ReactNode }) {
       games,
       loading,
       mode,
+      error,
       async saveGame(draft, opts) {
         const repo = activeRepo()
         if (!repo) throw new Error('No hay sesión activa para guardar juegos.')
@@ -77,24 +85,35 @@ export function GamesProvider({ children }: { children: ReactNode }) {
         const existing = games.find((g) => g.id === id)
         const game: Game = {
           ...draft,
+          tags: [...new Set(draft.tags ?? [])],
           id,
           catalogId: opts?.catalogId ?? existing?.catalogId,
           createdAt: existing?.createdAt ?? Date.now(),
           updatedAt: Date.now(),
         }
-        await repo.save(game)
+        try {
+          await repo.save(game)
+        } catch (err) {
+          console.error('Error al guardar el juego:', err)
+          throw new Error(describeFirestoreError(err))
+        }
         return game
       },
       async removeGame(id) {
         const repo = activeRepo()
         if (!repo) throw new Error('No hay sesión activa para eliminar juegos.')
-        await repo.remove(id)
+        try {
+          await repo.remove(id)
+        } catch (err) {
+          console.error('Error al eliminar el juego:', err)
+          throw new Error(describeFirestoreError(err))
+        }
       },
       restoreDemos() {
         if (mode === 'local') restoreDemoGamesLocally()
       },
     }
-  }, [games, loading, mode, user])
+  }, [games, loading, mode, error, user])
 
   return <GamesContext.Provider value={value}>{children}</GamesContext.Provider>
 }
