@@ -2,7 +2,7 @@
 
 **Super Ludoteca** es una PWA móvil en español: la herramienta *companion* para organizar tu colección de juegos de mesa y refrescar las reglas en la mesa en 3 minutos.
 
-- **Build desplegada:** https://axgaldo.github.io/super-ludoteca/ — versión actual: [v1.1.0](https://axgaldo.github.io/super-ludoteca/)
+- **Build desplegada:** https://axgaldo.github.io/super-ludoteca/ — versión actual: [v1.2.0](https://axgaldo.github.io/super-ludoteca/)
 - **Repositorio:** https://github.com/axgaldo/super-ludoteca
 
 ## Autoría (regla obligatoria)
@@ -22,7 +22,7 @@
 | Backend | Firebase 12 (Auth con Google + Firestore) | Solo si las variables de entorno están completas |
 | Fallback | Modo Invitado Local (localStorage) | La app debe funcionar al 100% sin ninguna clave |
 | PWA | vite-plugin-pwa (Workbox, `autoUpdate`) | Service worker + manifest |
-| IA | Chat de reglas con **Gemini fijo incluido en la build** (`gemini-3.8-flash` con modelos de respaldo; sin SDK, sin selector ni claves de usuario) | Decidido por [@axgaldo](https://github.com/axgaldo) en v1.1.0 |
+| IA | Chat de reglas con **Gemini vía proxy propio** (`worker/`, Cloudflare Worker): la API key vive como secret en Cloudflare y NUNCA entra en la build; el cliente solo conoce `VITE_AI_PROXY_URL` | Decisión de confidencialidad de [@axgaldo](https://github.com/axgaldo) en v1.2.0 |
 | Iconos | `npm run icons` genera los PNG de `public/` con `sharp`; fuente: `assets/logo-source.(png/jpg/webp)` si existe (logo IA) o `assets/logo.svg` (logo actual) | Reproducible con un comando |
 
 ## Comandos
@@ -40,7 +40,7 @@ npm run icons      # regenerar iconos PWA desde assets/logo-source.*
 Copia `.env.example` → `.env.local`. Nunca subas `.env.local` (está en `.gitignore`).
 
 - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`
-- `VITE_GEMINI_API_KEY`: clave del asistente de reglas. Va **incluida en la build** (no se configura desde la app) y también debe ir dentro del secret `FIREBASE_ENV` de producción.
+- `VITE_AI_PROXY_URL`: URL **pública** del Cloudflare Worker que hace de proxy de Gemini. La API key (`GEMINI_API_KEY`) **no** va en el entorno de la app: se guarda como secret cifrado en Cloudflare (ver `worker/README.md`).
 
 **Regla de oro:** si faltan las 6 variables de Firebase, la app arranca en *Modo Invitado Local* con un aviso discreto en el login y 3 juegos de ejemplo (Catán, Small World y Decrypto). Este fallback debe funcionar siempre; no lo rompas al refactorizar.
 
@@ -49,6 +49,10 @@ En producción (GitHub Pages) las variables viajan en **un único secret `FIREBA
 ## Estructura del proyecto
 
 ```
+worker/                      # Cloudflare Worker: proxy de Gemini (clave fuera del cliente)
+├── index.js                 # proxy con CORS, cadena de modelos, timeout y rate limit opcional
+├── wrangler.toml            # configuración para despliegue por CLI
+└── README.md                # guía de despliegue (panel web o CLI)
 src/
 ├── main.tsx                 # providers + arranque (Settings → Auth → Games → Router)
 ├── App.tsx                  # rutas (createHashRouter) y layout raíz
@@ -97,6 +101,7 @@ src/
 - **Persistencia local:** todas las claves de localStorage llevan prefijo `sl:` (`sl:games:v1`, `sl:guest`, `sl:settings:v1`, `sl:check:<idJuego>`, `sl:tools:*`).
 - **Firestore:** datos en `users/{uid}/games/{gameId}`, reglas por uid (ver README). Sanea los `undefined` antes de escribir (Firestore los rechaza).
 - **Accesibilidad:** `aria-label` en todos los botones de solo icono, contraste AA, foco visible.
+- **Secretos:** la API key de Gemini solo puede vivir en Cloudflare (`GEMINI_API_KEY`, secret del Worker, ver `worker/`). Está **VETADO** incluirla en el repo, en `.env` de la app o en cualquier variable `VITE_*`: todo lo que empieza por `VITE_` acaba incrustado en el bundle público. Las claves de Firebase son públicas por diseño; los datos los protegen las reglas de Firestore.
 - Los enlaces de versión siempre apuntan a la build: `[v1.0.0](https://axgaldo.github.io/super-ludoteca/)`.
 
 ## Git y versionado
@@ -120,10 +125,10 @@ src/
 3. **Ficha de refresco rápido** en 4 pestañas: Preparación (checklist interactivo persistente con reinicio), Turno (pasos numerados), Fin y Puntuación, Reglas Olvidadas/Dudas (aclaraciones + chat de Gemini con contexto de juego y nº de jugadores). Editar y eliminar con doble confirmación.
 4. **Alta de juegos:** catálogo precargado de **44 fichas completas** (alta instantánea) o formulario manual; etiquetas por juego (Party Game, Euro, Estrategia, Cooperativo, Temático, Familiar, Abstracto, Para 2, Campaña, Filler) asignadas en `data/catalog/index.ts`.
 5. **Cajón de herramientas de mesa:** jugador inicial animado, dados D6/D10/D20 con historial, contador de puntos/vida por jugadores, calculadora básica.
-6. **Ajustes:** modo oscuro/claro, acento (cálido/frío…), fuente, estado del asistente Gemini fijo, cuenta, acerca de.
+6. **Ajustes:** modo oscuro/claro, acento (cálido/frío…), fuente, estado del proxy del asistente, cuenta, acerca de.
 7. **Errores de Firestore:** los códigos (`permission-denied`, base inexistente, red…) se traducen a mensajes accionables en ludoteca y formularios (`describeFirestoreError` en `lib/utils.ts`).
 
 ## Roadmap (no implementar sin pedirlo)
 
-- v1.2: proxy para ocultar la clave de Gemini (p. ej. Cloudflare Worker) y generar fichas por IA desde el PDF del reglamento.
-- v1.2+: exportar/importar ludoteca en JSON, más juegos en el catálogo, marcos de puntuación persistentes por juego.
+- v1.3: generar fichas por IA desde el PDF del reglamento (aprovechando el proxy ya existente).
+- v1.3+: exportar/importar ludoteca en JSON, más juegos en el catálogo, marcos de puntuación persistentes por juego.

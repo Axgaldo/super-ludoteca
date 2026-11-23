@@ -1,7 +1,7 @@
 {
   "name": "super-ludoteca",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "PWA companion para organizar tu ludoteca y refrescar las reglas en la mesa.",
   "type": "module",
   "scripts": {
