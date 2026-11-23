@@ -1,0 +1,19 @@
+# Dependencias
+node_modules
+
+# Builds
+dist
+dev-dist
+
+# Entorno local (nunca subir claves reales)
+.env
+.env.*
+!.env.example
+
+# Caches y artefactos
+*.tsbuildinfo
+.vite
+
+# Sistema
+.DS_Store
+Thumbs.db
