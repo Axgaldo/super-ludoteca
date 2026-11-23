@@ -6,8 +6,12 @@ y nunca aparece en el bundle ni en el repositorio.
 
 ## Despliegue en 5 minutos (panel web, sin instalar nada)
 
-1. Crea una cuenta gratuita en [dash.cloudflare.com](https://dash.cloudflare.com).
-2. **Workers & Pages → Create → Worker** (nombre, p. ej. `super-ludoteca-ai`).
+> **No hace falta conectar GitHub** ni crear un «proyecto»: el Worker es un
+> único script que se pega en el editor de Cloudflare y se publica. El repo no
+> se toca y entre GitHub y Cloudflare no se comparte ninguna credencial.
+
+1. Crea una cuenta gratuita en [dash.cloudflare.com](https://dash.cloudflare.com) (sin tarjeta; el plan Free incluye 100.000 peticiones al día).
+2. En el panel: **Workers & Pages** (pestaña *Workers*) → **Create** → **Create Worker**. Elige la plantilla **Hello World** (no «Import a repository» / «Connect to Git»).
 3. Pulsa **Edit code**, borra el contenido y pega el archivo [`index.js`](index.js). **Deploy**.
 4. **Settings → Variables and Secrets → Add**:
    - `GEMINI_API_KEY` — tipo **Secret** — tu clave de [AI Studio](https://aistudio.google.com/apikey).
