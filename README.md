@@ -110,6 +110,8 @@ El push a `main` dispara el workflow `.github/workflows/deploy.yml` (build + pub
 
 3. **Añade también la URL del proxy de IA** dentro del mismo bloque del secret: `VITE_AI_PROXY_URL=https://tu-worker.workers.dev`. Así el chat de dudas funcionará en la web desplegada. La URL del proxy es pública (no es un secreto; la API key sigue solo en Cloudflare).
 
+> ⚠️ **El `.env`/`.env.local` de tu ordenador no se sube a GitHub**: solo sirve para desarrollo local. La web de GitHub Pages se compila con lo que haya en el secret `FIREBASE_ENV` (más los secrets que definas). Si cambias una variable, actualiza el secret y relanza el workflow.
+
 > Nota técnica: el router usa *hash routing* (`#/`) porque GitHub Pages no soporta rutas de History API sin un `404.html`.
 
 ## 📁 Estructura y convenciones
