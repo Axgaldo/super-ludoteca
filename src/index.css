@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Tokens de tema ── */
+:root {
+  --app: #f4f4f5;
+  --card: #ffffff;
+  --elev: #ffffff;
+  --ink: #18181b;
+  --muted: #71717a;
+  --line: #e4e4e7;
+  --accent: #f59e0b;
+  --accent-ink: #1c1917;
+  --app-font: "Nunito", ui-rounded, system-ui, sans-serif;
+
+  --accent-strong: color-mix(in oklab, var(--accent) 78%, #000);
+  --accent-soft: color-mix(in oklab, var(--accent) 16%, transparent);
+  --accent-softer: color-mix(in oklab, var(--accent) 9%, transparent);
+}
+
+/* Modo oscuro por defecto (clase .dark en <html>), ideal para no deslumbrar en la mesa */
+.dark {
+  --app: #09090b;
+  --card: #18181b;
+  --elev: #232327;
+  --ink: #f4f4f5;
+  --muted: #a1a1aa;
+  --line: #2a2a2e;
+}
+
+/* Expone los tokens como utilidades de Tailwind (bg-app, text-ink, bg-accent…) */
+@theme inline {
+  --color-app: var(--app);
+  --color-card: var(--card);
+  --color-elev: var(--elev);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-softer: var(--accent-softer);
+  --color-accent-ink: var(--accent-ink);
+  --font-app: var(--app-font);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background-color: var(--app);
+    color: var(--ink);
+    font-family: var(--app-font);
+    overscroll-behavior-y: none;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+}
+
+/* ── Animaciones ── */
+@keyframes sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.75); opacity: 0; }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes dice-shake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-8deg) scale(1.05); }
+  50% { transform: rotate(6deg) scale(1.08); }
+  75% { transform: rotate(-4deg) scale(1.03); }
+}
+
+.sheet-in { animation: sheet-in 0.28s cubic-bezier(0.32, 0.72, 0.24, 1); }
+.pop-in { animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.fade-up { animation: fade-up 0.25s ease-out; }
+.dice-shake { animation: dice-shake 0.5s ease-in-out infinite; }
+
+/* Ocultar scrollbars en carruseles de chips */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
