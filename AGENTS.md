@@ -2,7 +2,7 @@
 
 **Super Ludoteca** es una PWA móvil en español: la herramienta *companion* para organizar tu colección de juegos de mesa y refrescar las reglas en la mesa en 3 minutos.
 
-- **Build desplegada:** https://axgaldo.github.io/super-ludoteca/ — versión actual: [v1.2.0](https://axgaldo.github.io/super-ludoteca/)
+- **Build desplegada:** https://axgaldo.github.io/super-ludoteca/ — versión actual: [v1.3.0](https://axgaldo.github.io/super-ludoteca/)
 - **Repositorio:** https://github.com/axgaldo/super-ludoteca
 
 ## Autoría (regla obligatoria)
@@ -53,6 +53,9 @@ worker/                      # Cloudflare Worker: proxy de Gemini (clave fuera d
 ├── index.js                 # proxy con CORS, cadena de modelos, timeout y rate limit opcional
 ├── wrangler.toml            # configuración para despliegue por CLI
 └── README.md                # guía de despliegue (panel web o CLI)
+scripts/
+├── generate-icons.mjs       # iconos PWA desde assets/logo
+└── fetch-bgg-images.mjs     # portadas de BGG vía Wayback → data/catalog/images.ts
 src/
 ├── main.tsx                 # providers + arranque (Settings → Auth → Games → Router)
 ├── App.tsx                  # rutas (createHashRouter) y layout raíz
@@ -64,6 +67,7 @@ src/
 │   │   ├── index.ts         # CATALOG (44 juegos), etiquetas por juego y helpers
 │   │   ├── clasicos.ts      # 22 fichas clásicas
 │   │   ├── nuevos.ts        # 22 fichas de la ampliación v1.1.0
+│   │   ├── images.ts        # portadas de BGG: image (tarjeta) e imageWide (cabecera)
 │   │   └── types.ts         # tipos del catálogo
 │   └── demoGames.ts         # los 3 juegos del modo invitado
 ├── lib/
@@ -102,7 +106,8 @@ src/
 - **Firestore:** datos en `users/{uid}/games/{gameId}`, reglas por uid (ver README). Sanea los `undefined` antes de escribir (Firestore los rechaza).
 - **Accesibilidad:** `aria-label` en todos los botones de solo icono, contraste AA, foco visible.
 - **Secretos:** la API key de Gemini solo puede vivir en Cloudflare (`GEMINI_API_KEY`, secret del Worker, ver `worker/`). Está **VETADO** incluirla en el repo, en `.env` de la app o en cualquier variable `VITE_*`: todo lo que empieza por `VITE_` acaba incrustado en el bundle público. Las claves de Firebase son públicas por diseño; los datos los protegen las reglas de Firestore.
-- Los enlaces de versión siempre apuntan a la build: `[v1.0.0](https://axgaldo.github.io/super-ludoteca/)`.
+- **Portadas:** se enlazan desde el CDN público de BGG (`cf.geekdo-images.com`): `image` = tarjeta 246×300, `imageWide` = cabecera de ficha 1200×630. Si una imagen falla, la UI cae al degradado con iniciales. La API XML de BGG exige registro de aplicación, así que `scripts/fetch-bgg-images.mjs` obtiene las URLs desde snapshots de Wayback Machine; ejecútalo solo para regenerar `data/catalog/images.ts`.
+- Los enlaces de versión siempre apuntan a la build: `[v1.3.0](https://axgaldo.github.io/super-ludoteca/)`.
 
 ## Git y versionado
 
@@ -111,14 +116,14 @@ src/
 - El README empieza con tres badges: estado de la última build (workflow `deploy.yml`), estado del despliegue en producción (shields.io `website`) y versión (shields.io lee `package.json`, así que se actualiza sola al subir versión).
 - Despliegue: push a `main` → GitHub Actions → GitHub Pages. Requisito único en el repo: *Settings → Pages → Source: GitHub Actions*.
 
-## Auditoría de dependencias (estado conocido, v1.1.0)
+## Auditoría de dependencias (estado conocido, v1.3.0)
 
 `npm audit` reporta avisos **sin parche disponible dentro de los rangos actuales**; NO ejecutes `npm audit fix --force` (revierte Firebase a 9.x). Estado aceptado:
 
 - `@grpc/grpc-js` / `@firebase/firestore` / `firebase` (high): transitivas del SDK oficial de Firebase; los avisos afectan a usos de gRPC en servidor, no a una app de navegador. Se resuelven cuando Google publique las versiones corregidas.
 - `sharp`, `workbox-build`, `glob`, `minimatch` (moderate/high): solo se usan en build/ desarrollo (generación de iconos, workbox), no llegan al bundle de producción.
 
-## Mapa de funcionalidades (v1.1.0)
+## Mapa de funcionalidades (v1.3.0)
 
 1. **Login:** Google (`signInWithPopup`) o *Modo Invitado Local* si no hay Firebase. Aviso discreto si falta config.
 2. **Mi Ludoteca:** búsqueda en tiempo real, filtros (jugadores / duración / dificultad / categoría), tarjetas con portada o degradado + iniciales, botón «+ Añadir juego».

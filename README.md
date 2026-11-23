@@ -4,7 +4,7 @@
 [![Estado en producción](https://img.shields.io/website?url=https%3A%2F%2Faxgaldo.github.io%2Fsuper-ludoteca%2F&label=producci%C3%B3n&up_message=online&down_message=offline)](https://axgaldo.github.io/super-ludoteca/)
 [![Versión](https://img.shields.io/github/package-json/v/axgaldo/super-ludoteca?label=versi%C3%B3n&color=f59e0b)](https://axgaldo.github.io/super-ludoteca/)
 
-**[v1.2.0](https://axgaldo.github.io/super-ludoteca/)** · App en línea: **https://axgaldo.github.io/super-ludoteca/**
+**[v1.3.0](https://axgaldo.github.io/super-ludoteca/)** · App en línea: **https://axgaldo.github.io/super-ludoteca/**
 
 PWA móvil en español pensada como *companion* para tus partidas de juegos de mesa: organiza tu colección, filtra por jugadores, tiempo o dificultad y refresca las reglas en la mesa en 3 minutos, con un cajón de herramientas para no salir nunca de la app.
 
@@ -24,6 +24,8 @@ Creada por [@axgaldo](https://github.com/axgaldo).
 - 🏷️ **Categorías:** Party Game, Euro, Estrategia, Cooperativo, Temático, Familiar, Abstracto, Para 2, Campaña y Filler para filtrar y encontrar el juego perfecto para cada mesa.
 - 🧰 **Cajón de herramientas de mesa:** selector de jugador inicial con animación, dados D6/D10/D20 con historial, contador de puntos/vida por jugadores y calculadora rápida.
 - 🎨 **Ajustes de apariencia:** acentos cálidos/fríos, tipo de letra redonda/clásica/serif.
+
+> Las portadas del catálogo se enlazan desde el CDN público de BoardGameGeek (`cf.geekdo-images.com`); si una imagen no carga, la tarjeta muestra el degradado con iniciales. Se pueden regenerar con `node scripts/fetch-bgg-images.mjs` (usa Wayback Machine porque la API XML de BGG exige registro).
 
 ## 🛠️ Tecnología
 
@@ -124,4 +126,4 @@ Consulta el archivo [LICENSE](LICENSE).
 
 ---
 
-Hecho por [@axgaldo](https://github.com/axgaldo) · Versión [v1.2.0](https://axgaldo.github.io/super-ludoteca/)
+Hecho por [@axgaldo](https://github.com/axgaldo) · Versión [v1.3.0](https://axgaldo.github.io/super-ludoteca/)

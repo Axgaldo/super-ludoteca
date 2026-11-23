@@ -1,7 +1,7 @@
 // Constantes de la aplicación y lectura segura de variables de entorno.
 
 export const APP_NAME = 'Super Ludoteca'
-export const APP_VERSION = 'v1.2.0'
+export const APP_VERSION = 'v1.3.0'
 /** Toda mención a la versión enlaza a la build desplegada (GitHub Pages). */
 export const APP_URL = 'https://axgaldo.github.io/super-ludoteca/'
 export const REPO_URL = 'https://github.com/axgaldo/super-ludoteca'
