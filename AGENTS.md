@@ -44,7 +44,7 @@ Copia `.env.example` → `.env.local`. Nunca subas `.env.local` (está en `.giti
 
 **Regla de oro:** si faltan las 6 variables de Firebase, la app arranca en *Modo Invitado Local* con un aviso discreto en el login y 3 juegos de ejemplo (Catán, Small World y Decrypto). Este fallback debe funcionar siempre; no lo rompas al refactorizar.
 
-En producción (GitHub Pages) las variables se inyectan como **secrets del workflow** `.github/workflows/deploy.yml`, no hay `.env` en el servidor.
+En producción (GitHub Pages) las variables viajan en **un único secret `FIREBASE_ENV`** (bloque `.env` multilínea) que el workflow vuelca en `.env.local` antes de compilar; no hay `.env` en el servidor.
 
 ## Estructura del proyecto
 

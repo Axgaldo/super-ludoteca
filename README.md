@@ -86,20 +86,20 @@ Opcional: se configuran dentro de la app (**Ajustes → Inteligencia artificial*
 El push a `main` dispara el workflow `.github/workflows/deploy.yml` (build + publish). Solo hay que configurarlo una vez:
 
 1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-2. **Settings → Secrets and variables → Actions → New repository secret**: crea **un secret por cada variable** (no pegues el `.env` entero). El **nombre** debe ser exactamente el de la izquierda y el **valor** solo lo que va tras el `=` en tu `.env.local` (sin comillas, sin espacios finales y sin repetir el prefijo):
+2. **Settings → Secrets and variables → Actions → New repository secret**: crea **un único secret** llamado `FIREBASE_ENV` cuyo valor es el bloque de variables completo, copiado de tu `.env.local` (multilínea, sin comillas ni `export`):
 
-   | Nombre del secret | Valor (ejemplo) |
-   |---|---|
-   | `VITE_FIREBASE_API_KEY` | `AIzaSyD…` |
-   | `VITE_FIREBASE_AUTH_DOMAIN` | `super-ludoteca.firebaseapp.com` |
-   | `VITE_FIREBASE_PROJECT_ID` | `super-ludoteca` |
-   | `VITE_FIREBASE_STORAGE_BUCKET` | `super-ludoteca.firebasestorage.app` |
-   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | `123456789012` |
-   | `VITE_FIREBASE_APP_ID` | `1:123456789012:web:abc123…` |
+   ```env
+   VITE_FIREBASE_API_KEY=AIzaSyD…
+   VITE_FIREBASE_AUTH_DOMAIN=super-ludoteca.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=super-ludoteca
+   VITE_FIREBASE_STORAGE_BUCKET=super-ludoteca.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+   VITE_FIREBASE_APP_ID=1:123456789012:web:abc123…
+   ```
 
-   Tras añadirlos, relanza la build: **Actions → «Deploy a GitHub Pages» → Re-run all jobs** (o haz cualquier push). Si faltan, la web se despliega igualmente en Modo Invitado Local.
+   El workflow vuelca ese secret en `.env.local` antes de compilar y avisa en el log si falta alguna variable. Tras crearlo, relanza la build: **Actions → «Deploy a GitHub Pages» → Re-run all jobs** (o haz cualquier push). Si el secret no existe, la web se despliega igualmente en Modo Invitado Local.
 
-3. **Claves de IA (`VITE_GEMINI_API_KEY` / `VITE_DEEPSEEK_API_KEY`) — no recomendado como secrets**: cualquier variable `VITE_` acaba incrustada en el JavaScript público de la web (cualquiera puede leerla). La de Firebase es pública por diseño (la protección real son las reglas de Firestore), pero una clave de IA es facturable: configúrala desde **Ajustes** de la app, que solo la guarda en tu dispositivo.
+3. **Claves de IA — mejor fuera de `FIREBASE_ENV`**: cualquier variable `VITE_` acaba incrustada en el JavaScript público de la web (cualquiera puede leerla). La de Firebase es pública por diseño (la protección real son las reglas de Firestore), pero una clave de IA es facturable: configúrala desde **Ajustes** de la app, que solo la guarda en tu dispositivo.
 
 > Nota técnica: el router usa *hash routing* (`#/`) porque GitHub Pages no soporta rutas de History API sin un `404.html`.
 

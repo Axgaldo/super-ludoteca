@@ -30,19 +30,24 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      # Un único secret FIREBASE_ENV con el bloque .env completo (multilínea).
+      # Si no existe, la app se compila igualmente en Modo Invitado Local.
+      - name: Preparar variables de entorno (Firebase)
+        env:
+          FIREBASE_ENV: ${{ secrets.FIREBASE_ENV }}
+        run: |
+          if [ -n "$FIREBASE_ENV" ]; then
+            printf '%s\n' "$FIREBASE_ENV" > .env.local
+            echo "✔ .env.local creado desde el secret FIREBASE_ENV"
+            for v in VITE_FIREBASE_API_KEY VITE_FIREBASE_AUTH_DOMAIN VITE_FIREBASE_PROJECT_ID VITE_FIREBASE_STORAGE_BUCKET VITE_FIREBASE_MESSAGING_SENDER_ID VITE_FIREBASE_APP_ID; do
+              grep -q "^$v=." .env.local || echo "⚠️  Falta $v en el secret FIREBASE_ENV"
+            done
+          else
+            echo "⚠️  Sin secret FIREBASE_ENV: la build se desplegará en Modo Invitado Local"
+          fi
+
       - name: Compilar la app
         run: npm run build
-        env:
-          # Se inyectan como secrets del repo (Settings → Secrets and variables → Actions).
-          # Si faltan, la app se despliega igualmente en Modo Invitado Local.
-          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
-          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
-          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
-          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
-          VITE_DEEPSEEK_API_KEY: ${{ secrets.VITE_DEEPSEEK_API_KEY }}
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
