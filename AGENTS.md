@@ -2,7 +2,7 @@
 
 **Super Ludoteca** es una PWA móvil en español: la herramienta *companion* para organizar tu colección de juegos de mesa y refrescar las reglas en la mesa en 3 minutos.
 
-- **Build desplegada:** https://axgaldo.github.io/super-ludoteca/ — versión actual: [v1.0.0](https://axgaldo.github.io/super-ludoteca/)
+- **Build desplegada:** https://axgaldo.github.io/super-ludoteca/ — versión actual: [v1.1.0](https://axgaldo.github.io/super-ludoteca/)
 - **Repositorio:** https://github.com/axgaldo/super-ludoteca
 
 ## Autoría (regla obligatoria)
@@ -22,7 +22,7 @@
 | Backend | Firebase 12 (Auth con Google + Firestore) | Solo si las variables de entorno están completas |
 | Fallback | Modo Invitado Local (localStorage) | La app debe funcionar al 100% sin ninguna clave |
 | PWA | vite-plugin-pwa (Workbox, `autoUpdate`) | Service worker + manifest |
-| IA | Chat de reglas con **Gemini y DeepSeek** configurables (fetch directo, sin SDK) | Elegido por [@axgaldo](https://github.com/axgaldo) |
+| IA | Chat de reglas con **Gemini fijo incluido en la build** (`gemini-3.8-flash` con modelos de respaldo; sin SDK, sin selector ni claves de usuario) | Decidido por [@axgaldo](https://github.com/axgaldo) en v1.1.0 |
 | Iconos | `npm run icons` genera los PNG de `public/` con `sharp`; fuente: `assets/logo-source.(png/jpg/webp)` si existe (logo IA) o `assets/logo.svg` (logo actual) | Reproducible con un comando |
 
 ## Comandos
@@ -40,7 +40,7 @@ npm run icons      # regenerar iconos PWA desde assets/logo-source.*
 Copia `.env.example` → `.env.local`. Nunca subas `.env.local` (está en `.gitignore`).
 
 - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`
-- Opcionales: `VITE_GEMINI_API_KEY`, `VITE_DEEPSEEK_API_KEY`
+- `VITE_GEMINI_API_KEY`: clave del asistente de reglas. Va **incluida en la build** (no se configura desde la app) y también debe ir dentro del secret `FIREBASE_ENV` de producción.
 
 **Regla de oro:** si faltan las 6 variables de Firebase, la app arranca en *Modo Invitado Local* con un aviso discreto en el login y 3 juegos de ejemplo (Catán, Small World y Decrypto). Este fallback debe funcionar siempre; no lo rompas al refactorizar.
 
@@ -56,15 +56,19 @@ src/
 ├── types.ts                 # modelo: Game, Difficulty, Settings, catálogos de opciones
 ├── config/env.ts            # constantes de la app + lectura de variables de entorno
 ├── data/
-│   ├── catalog.ts           # catálogo precargado de 22 juegos con fichas completas
+│   ├── catalog/
+│   │   ├── index.ts         # CATALOG (44 juegos), etiquetas por juego y helpers
+│   │   ├── clasicos.ts      # 22 fichas clásicas
+│   │   ├── nuevos.ts        # 22 fichas de la ampliación v1.1.0
+│   │   └── types.ts         # tipos del catálogo
 │   └── demoGames.ts         # los 3 juegos del modo invitado
 ├── lib/
 │   ├── firebase.ts          # inicialización perezosa de Firebase (null si no está configurado)
 │   ├── repos.ts             # repositorio de juegos: Firestore (cloud) o localStorage (local)
-│   ├── ai.ts                # cliente del chat: Gemini y DeepSeek (fetch directo)
+│   ├── ai.ts                # chat con Gemini fijo (modelos Flash con respaldo automático)
 │   └── utils.ts             # cn(), gradientes de portada, iniciales, formatos
 ├── context/
-│   ├── SettingsContext.tsx  # tema, acento, fuente, claves de IA (localStorage sl:settings:v1)
+│   ├── SettingsContext.tsx  # tema, acento y fuente (localStorage sl:settings:v1)
 │   ├── AuthContext.tsx      # Google / invitado / sesión
 │   └── GamesContext.tsx     # lista de juegos según repositorio activo
 ├── hooks/useLocalStorage.ts # persistencia con clave prefijada
@@ -102,23 +106,24 @@ src/
 - El README empieza con tres badges: estado de la última build (workflow `deploy.yml`), estado del despliegue en producción (shields.io `website`) y versión (shields.io lee `package.json`, así que se actualiza sola al subir versión).
 - Despliegue: push a `main` → GitHub Actions → GitHub Pages. Requisito único en el repo: *Settings → Pages → Source: GitHub Actions*.
 
-## Auditoría de dependencias (estado conocido, v1.0.0)
+## Auditoría de dependencias (estado conocido, v1.1.0)
 
 `npm audit` reporta avisos **sin parche disponible dentro de los rangos actuales**; NO ejecutes `npm audit fix --force` (revierte Firebase a 9.x). Estado aceptado:
 
 - `@grpc/grpc-js` / `@firebase/firestore` / `firebase` (high): transitivas del SDK oficial de Firebase; los avisos afectan a usos de gRPC en servidor, no a una app de navegador. Se resuelven cuando Google publique las versiones corregidas.
 - `sharp`, `workbox-build`, `glob`, `minimatch` (moderate/high): solo se usan en build/ desarrollo (generación de iconos, workbox), no llegan al bundle de producción.
 
-## Mapa de funcionalidades (v1.0.0)
+## Mapa de funcionalidades (v1.1.0)
 
 1. **Login:** Google (`signInWithPopup`) o *Modo Invitado Local* si no hay Firebase. Aviso discreto si falta config.
-2. **Mi Ludoteca:** búsqueda en tiempo real, filtros (jugadores / duración / dificultad), tarjetas con portada o degradado + iniciales, botón «+ Añadir juego».
-3. **Ficha de refresco rápido** en 4 pestañas: Preparación (checklist interactivo persistente con reinicio), Turno (pasos numerados), Fin y Puntuación, Reglas Olvidadas/Dudas (aclaraciones + chat de IA con contexto de juego y nº de jugadores). Editar y eliminar con doble confirmación.
-4. **Alta de juegos:** desde catálogo precargado (22 fichas completas, alta instantánea) o con formulario manual.
+2. **Mi Ludoteca:** búsqueda en tiempo real, filtros (jugadores / duración / dificultad / categoría), tarjetas con portada o degradado + iniciales, botón «+ Añadir juego».
+3. **Ficha de refresco rápido** en 4 pestañas: Preparación (checklist interactivo persistente con reinicio), Turno (pasos numerados), Fin y Puntuación, Reglas Olvidadas/Dudas (aclaraciones + chat de Gemini con contexto de juego y nº de jugadores). Editar y eliminar con doble confirmación.
+4. **Alta de juegos:** catálogo precargado de **44 fichas completas** (alta instantánea) o formulario manual; etiquetas por juego (Party Game, Euro, Estrategia, Cooperativo, Temático, Familiar, Abstracto, Para 2, Campaña, Filler) asignadas en `data/catalog/index.ts`.
 5. **Cajón de herramientas de mesa:** jugador inicial animado, dados D6/D10/D20 con historial, contador de puntos/vida por jugadores, calculadora básica.
-6. **Ajustes:** modo oscuro/claro, acento (cálido/frío…), fuente, proveedor de IA y claves, cuenta, acerca de.
+6. **Ajustes:** modo oscuro/claro, acento (cálido/frío…), fuente, estado del asistente Gemini fijo, cuenta, acerca de.
+7. **Errores de Firestore:** los códigos (`permission-denied`, base inexistente, red…) se traducen a mensajes accionables en ludoteca y formularios (`describeFirestoreError` en `lib/utils.ts`).
 
 ## Roadmap (no implementar sin pedirlo)
 
-- v1.1: generación de fichas por IA desde el PDF del reglamento (decidido: pospuesto a favor del catálogo).
-- v1.1+: exportar/importar ludoteca en JSON, más juegos en el catálogo, marcos de puntuación persistentes por juego.
+- v1.2: proxy para ocultar la clave de Gemini (p. ej. Cloudflare Worker) y generar fichas por IA desde el PDF del reglamento.
+- v1.2+: exportar/importar ludoteca en JSON, más juegos en el catálogo, marcos de puntuación persistentes por juego.
