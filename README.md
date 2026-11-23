@@ -1,5 +1,9 @@
 # 🎲 Super Ludoteca
 
+[![Build](https://github.com/axgaldo/super-ludoteca/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/axgaldo/super-ludoteca/actions/workflows/deploy.yml)
+[![Estado en producción](https://img.shields.io/website?url=https%3A%2F%2Faxgaldo.github.io%2Fsuper-ludoteca%2F&label=producci%C3%B3n&up_message=online&down_message=offline)](https://axgaldo.github.io/super-ludoteca/)
+[![Versión](https://img.shields.io/github/package-json/v/axgaldo/super-ludoteca?label=versi%C3%B3n&color=f59e0b)](https://axgaldo.github.io/super-ludoteca/)
+
 **[v1.0.0](https://axgaldo.github.io/super-ludoteca/)** · App en línea: **https://axgaldo.github.io/super-ludoteca/**
 
 PWA móvil en español pensada como *companion* para tus partidas de juegos de mesa: organiza tu colección, filtra por jugadores, tiempo o dificultad y refresca las reglas en la mesa en 3 minutos, con un cajón de herramientas para no salir nunca de la app.

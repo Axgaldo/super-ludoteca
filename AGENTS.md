@@ -99,6 +99,7 @@ src/
 
 - Commits convencionales en español y minúscula: `feat:`, `fix:`, `docs:`, `chore:`, `build:`.
 - **Versionado semántico** `vMAJOR.MINOR.PATCH` desde [v1.0.0](https://axgaldo.github.io/super-ludoteca/). Al subir versión: actualizar `package.json`, `APP_VERSION` en `src/config/env.ts`, y el número mencionado en README/AGENTS (siempre como enlace a la build).
+- El README empieza con tres badges: estado de la última build (workflow `deploy.yml`), estado del despliegue en producción (shields.io `website`) y versión (shields.io lee `package.json`, así que se actualiza sola al subir versión).
 - Despliegue: push a `main` → GitHub Actions → GitHub Pages. Requisito único en el repo: *Settings → Pages → Source: GitHub Actions*.
 
 ## Auditoría de dependencias (estado conocido, v1.0.0)
