@@ -1,7 +1,7 @@
 // Constantes de la aplicación y lectura segura de variables de entorno.
 
 export const APP_NAME = 'Super Ludoteca'
-export const APP_VERSION = 'v1.0.0'
+export const APP_VERSION = 'v1.1.0'
 /** Toda mención a la versión enlaza a la build desplegada (GitHub Pages). */
 export const APP_URL = 'https://axgaldo.github.io/super-ludoteca/'
 export const REPO_URL = 'https://github.com/axgaldo/super-ludoteca'
@@ -24,9 +24,13 @@ export const firebaseEnv = {
 /** ¿Están las 6 variables de Firebase configuradas? Si no, se ofrece el Modo Invitado Local. */
 export const isFirebaseConfigured = Object.values(firebaseEnv).every((v) => typeof v === 'string' && v.length > 0)
 
-/** Claves de IA detectadas en el entorno (se usan como valor por defecto si Ajustes no tiene otra). */
+// ─── Asistente de reglas (Gemini incluido en la build) ────────────────
+
+/** Clave de Gemini incluida en el build. No se configura desde la app. */
 export const envGeminiKey = import.meta.env.VITE_GEMINI_API_KEY ?? ''
-export const envDeepSeekKey = import.meta.env.VITE_DEEPSEEK_API_KEY ?? ''
+
+/** ¿La build trae clave para el chat de reglas? */
+export const hasBuiltInAiKey = envGeminiKey.length > 0
 
 /** Ruta de un asset público respetando el base path de GitHub Pages. */
 export function asset(path: string): string {

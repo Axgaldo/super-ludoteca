@@ -2,11 +2,11 @@ import { useState, type ReactNode } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { useGames } from '../context/GamesContext'
-import { ACCENTS, FONTS, type AccentKey, type AiProvider, type FontKey, type ThemeMode } from '../types'
-import { APP_URL, APP_VERSION, AUTHOR, REPO_URL, asset, envDeepSeekKey, envGeminiKey } from '../config/env'
+import { ACCENTS, FONTS, type AccentKey, type FontKey, type ThemeMode } from '../types'
+import { APP_URL, APP_VERSION, AUTHOR, REPO_URL, asset, hasBuiltInAiKey } from '../config/env'
 import { askAi } from '../lib/ai'
 import { cn, initials } from '../lib/utils'
-import { Button, Field, inputClasses } from '../components/ui'
+import { Button } from '../components/ui'
 import { IconCheck, IconMoon, IconSparkles, IconSun } from '../components/icons'
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
@@ -20,28 +20,24 @@ function SectionCard({ title, children }: { title: string; children: ReactNode }
   )
 }
 
-/** Ajustes: apariencia, IA, cuenta y acerca de. */
+/** Ajustes: apariencia, asistente de IA incluido, cuenta y acerca de. */
 export default function SettingsView() {
   const { status, user, guest, firebaseConfigured, signOut } = useAuth()
   const { settings, update } = useSettings()
-  const { mode, restoreDemos } = useGames()
+  const { mode, error: syncError, restoreDemos } = useGames()
 
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<string | null>(null)
-
-  const providerLabel = settings.aiProvider === 'gemini' ? 'Gemini' : 'DeepSeek'
-  const apiKey =
-    settings.aiProvider === 'gemini' ? settings.geminiKey || envGeminiKey : settings.deepseekKey || envDeepSeekKey
-  const envKeyPresent = settings.aiProvider === 'gemini' ? Boolean(envGeminiKey) : Boolean(envDeepSeekKey)
 
   async function testConnection() {
     setTesting(true)
     setTestResult(null)
     try {
-      const answer = await askAi(settings.aiProvider, apiKey, [
-        { role: 'user', content: 'Responde únicamente: listo' },
-      ], 'Eres una prueba de conexión de Super Ludoteca.')
-      setTestResult(`✓ Conexión correcta con ${providerLabel}: «${answer.slice(0, 40)}»`)
+      const answer = await askAi(
+        [{ role: 'user', content: 'Responde únicamente: listo' }],
+        'Eres una prueba de conexión de Super Ludoteca.',
+      )
+      setTestResult(`✓ Conexión correcta con Gemini: «${answer.slice(0, 40)}»`)
     } catch (err) {
       setTestResult(err instanceof Error ? err.message : 'Error inesperado al probar la conexión.')
     } finally {
@@ -132,82 +128,49 @@ export default function SettingsView() {
         </div>
       </SectionCard>
 
-      {/* IA */}
-      <SectionCard title="Inteligencia artificial (chat de dudas)">
-        <div className="grid grid-cols-2 gap-2">
-          {(['gemini', 'deepseek'] as AiProvider[]).map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => update({ aiProvider: p })}
-              className={cn(
-                'flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl border font-bold transition-colors',
-                settings.aiProvider === p ? 'border-accent bg-accent-soft text-ink' : 'border-line bg-card text-muted hover:text-ink',
-              )}
-            >
-              <IconSparkles className="h-5 w-5 text-accent" />
-              {p === 'gemini' ? 'Gemini (gratis)' : 'DeepSeek'}
-            </button>
-          ))}
+      {/* IA fija */}
+      <SectionCard title="Asistente de reglas (Gemini)">
+        <div className="flex items-start gap-2">
+          <IconSparkles className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+          <p className="text-sm">
+            El chat de dudas usa <span className="font-bold">Gemini</span> con una clave incluida en
+            la build: no hay nada que configurar ni que pegar.
+          </p>
         </div>
 
-        <Field
-          label={`API key de ${providerLabel}`}
-          htmlFor="ai-key"
-          hint={
-            envKeyPresent
-              ? 'Dejando el campo vacío se usará la clave configurada en el entorno (VITE_' +
-                (settings.aiProvider === 'gemini' ? 'GEMINI' : 'DEEPSEEK') +
-                '_API_KEY).'
-              : undefined
-          }
-        >
-          <input
-            id="ai-key"
-            type="password"
-            autoComplete="off"
-            className={inputClasses}
-            placeholder="Pega aquí tu API key…"
-            value={settings.aiProvider === 'gemini' ? settings.geminiKey : settings.deepseekKey}
-            onChange={(e) =>
-              update(
-                settings.aiProvider === 'gemini' ? { geminiKey: e.target.value } : { deepseekKey: e.target.value },
-              )
-            }
-          />
-        </Field>
-
-        <p className="text-xs text-muted">
-          La clave se guarda solo en este dispositivo (localStorage) y viaja directamente de tu
-          navegador al proveedor, sin pasar por otros servidores.
+        <p className="text-sm text-muted">
+          Estado:{' '}
+          {hasBuiltInAiKey
+            ? '✓ configurado en esta build'
+            : '✗ sin configurar (falta VITE_GEMINI_API_KEY en el entorno de compilación)'}
         </p>
 
-        <div className="flex flex-wrap gap-3 text-xs font-bold text-accent">
-          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">
-            Obtener clave de Gemini →
-          </a>
-          <a href="https://platform.deepseek.com" target="_blank" rel="noreferrer">
-            Obtener clave de DeepSeek →
-          </a>
-        </div>
+        {hasBuiltInAiKey && (
+          <div className="flex flex-wrap items-center gap-3">
+            <Button size="sm" variant="primary" onClick={() => void testConnection()} disabled={testing}>
+              {testing ? 'Probando…' : 'Probar conexión'}
+            </Button>
+            {testResult && (
+              <p
+                className={cn(
+                  'text-sm',
+                  testResult.startsWith('✓')
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-500',
+                )}
+              >
+                {testResult}
+              </p>
+            )}
+          </div>
+        )}
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Button size="sm" variant="primary" onClick={() => void testConnection()} disabled={testing || !apiKey}>
-            {testing ? 'Probando…' : 'Probar conexión'}
-          </Button>
-          {testResult && (
-            <p
-              className={cn(
-                'text-sm',
-                testResult.startsWith('✓')
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-rose-500',
-              )}
-            >
-              {testResult}
-            </p>
-          )}
-        </div>
+        <p className="text-xs text-muted">
+          Aviso: en una web estática la clave viaja dentro del JavaScript y alguien con
+          conocimientos podría extraerla. Para un uso personal es aceptable; si quieres ocultarla de
+          verdad, necesitas un proxy (p. ej. un Cloudflare Worker) que la guarde en el servidor.
+          Recomendado: restringe la clave a la API «Generative Language» en Google Cloud.
+        </p>
       </SectionCard>
 
       {/* Cuenta y datos */}
@@ -247,7 +210,9 @@ export default function SettingsView() {
 
         <p className="text-xs text-muted">
           {mode === 'cloud'
-            ? 'Sincronizando con Firestore en la nube de tu cuenta de Google.'
+            ? syncError
+              ? `⚠ ${syncError}`
+              : 'Sincronizando con Firestore en la nube de tu cuenta de Google.'
             : 'Modo local: si borras los datos del navegador, se pierden.'}
         </p>
       </SectionCard>

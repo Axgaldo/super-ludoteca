@@ -9,9 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET?: string
   readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string
   readonly VITE_FIREBASE_APP_ID?: string
-  /** Opcionales: claves por defecto del chat de reglas */
+  /** Clave del asistente de reglas, incluida en la build */
   readonly VITE_GEMINI_API_KEY?: string
-  readonly VITE_DEEPSEEK_API_KEY?: string
 }
 
 interface ImportMeta {

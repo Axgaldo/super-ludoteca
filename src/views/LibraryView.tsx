@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useGames } from '../context/GamesContext'
-import type { Difficulty } from '../types'
-import { DIFFICULTY_LABELS } from '../types'
+import type { Difficulty, GameTag } from '../types'
+import { DIFFICULTY_LABELS, GAME_TAGS, GAME_TAG_KEYS } from '../types'
 import { cn } from '../lib/utils'
 import { GameCard } from '../components/GameCard'
 import { Button, Chip } from '../components/ui'
@@ -24,13 +24,14 @@ interface Filters {
   players: number | null
   duration: DurationFilter | null
   difficulty: Difficulty | null
+  tag: GameTag | null
 }
 
-const NO_FILTERS: Filters = { players: null, duration: null, difficulty: null }
+const NO_FILTERS: Filters = { players: null, duration: null, difficulty: null, tag: null }
 
 /** Mi Ludoteca: buscador, filtros y cuadrícula de juegos. */
 export default function LibraryView() {
-  const { games, loading, mode } = useGames()
+  const { games, loading, mode, error } = useGames()
   const [query, setQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
@@ -38,7 +39,8 @@ export default function LibraryView() {
   const activeFilterCount =
     (filters.players !== null ? 1 : 0) +
     (filters.duration !== null ? 1 : 0) +
-    (filters.difficulty !== null ? 1 : 0)
+    (filters.difficulty !== null ? 1 : 0) +
+    (filters.tag !== null ? 1 : 0)
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -49,6 +51,7 @@ export default function LibraryView() {
         return false
       if (durationTest && !durationTest(g.durationMin)) return false
       if (filters.difficulty !== null && g.difficulty !== filters.difficulty) return false
+      if (filters.tag !== null && !(g.tags ?? []).includes(filters.tag)) return false
       return true
     })
   }, [games, query, filters])
@@ -65,6 +68,13 @@ export default function LibraryView() {
               }`}
         </p>
       </div>
+
+          {error && (
+            <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-600 dark:text-rose-400">
+              <p className="font-bold">Problema al sincronizar con Firestore</p>
+              <p className="mt-0.5">{error}</p>
+            </div>
+          )}
 
       {/* Buscador + botón de filtros */}
       <div className="flex gap-2">
@@ -155,6 +165,21 @@ export default function LibraryView() {
                   onClick={() => setFilters((f) => ({ ...f, difficulty: f.difficulty === d ? null : d }))}
                 >
                   {DIFFICULTY_LABELS[d]}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">Categoría</p>
+            <div className="flex flex-wrap gap-2">
+              {GAME_TAG_KEYS.map((tag) => (
+                <Chip
+                  key={tag}
+                  active={filters.tag === tag}
+                  onClick={() => setFilters((f) => ({ ...f, tag: f.tag === tag ? null : tag }))}
+                >
+                  {GAME_TAGS[tag].label}
                 </Chip>
               ))}
             </div>

@@ -20,6 +20,35 @@ export const DIFFICULTY_CLASSES: Record<Difficulty, string> = {
   5: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/25',
 }
 
+// ─── Etiquetas / categorías ─────────────────────────────────────────────
+
+export type GameTag =
+  | 'party'
+  | 'euro'
+  | 'estrategia'
+  | 'cooperativo'
+  | 'tematico'
+  | 'familiar'
+  | 'abstracto'
+  | 'duelos'
+  | 'campana'
+  | 'filler'
+
+export const GAME_TAGS: Record<GameTag, { label: string; classes: string }> = {
+  party: { label: 'Party Game', classes: 'bg-pink-500/15 text-pink-700 border-pink-500/25 dark:text-pink-300' },
+  euro: { label: 'Euro', classes: 'bg-amber-500/15 text-amber-700 border-amber-500/25 dark:text-amber-300' },
+  estrategia: { label: 'Estrategia', classes: 'bg-sky-500/15 text-sky-700 border-sky-500/25 dark:text-sky-300' },
+  cooperativo: { label: 'Cooperativo', classes: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/25 dark:text-emerald-300' },
+  tematico: { label: 'Temático', classes: 'bg-violet-500/15 text-violet-700 border-violet-500/25 dark:text-violet-300' },
+  familiar: { label: 'Familiar', classes: 'bg-lime-500/15 text-lime-700 border-lime-500/25 dark:text-lime-300' },
+  abstracto: { label: 'Abstracto', classes: 'bg-teal-500/15 text-teal-700 border-teal-500/25 dark:text-teal-300' },
+  duelos: { label: 'Para 2', classes: 'bg-cyan-500/15 text-cyan-700 border-cyan-500/25 dark:text-cyan-300' },
+  campana: { label: 'Campaña', classes: 'bg-orange-500/15 text-orange-700 border-orange-500/25 dark:text-orange-300' },
+  filler: { label: 'Filler', classes: 'bg-fuchsia-500/15 text-fuchsia-700 border-fuchsia-500/25 dark:text-fuchsia-300' },
+}
+
+export const GAME_TAG_KEYS = Object.keys(GAME_TAGS) as GameTag[]
+
 /** Regla típica que siempre se olvida o aclaración importante */
 export interface ForgottenRule {
   title: string
@@ -37,6 +66,8 @@ export interface Game {
   /** Duración estimada en minutos */
   durationMin: number
   difficulty: Difficulty
+  /** Categorías / etiquetas (opcional por compatibilidad con fichas antiguas) */
+  tags?: GameTag[]
   /** Checklist de preparación */
   setup: string[]
   /** Pasos del turno de un jugador */
@@ -56,12 +87,11 @@ export interface Game {
 /** Datos editables de un juego (sin id ni marcas de tiempo) */
 export type GameDraft = Omit<Game, 'id' | 'createdAt' | 'updatedAt' | 'catalogId'>
 
-// ─── Apariencia y ajustes ─────────────────────────────────────────────
+// ─── Apariencia ────────────────────────────────────────────────────────
 
 export type ThemeMode = 'dark' | 'light'
 export type AccentKey = 'ambar' | 'cian' | 'violeta' | 'esmeralda' | 'rosa'
 export type FontKey = 'redonda' | 'clasica' | 'serif'
-export type AiProvider = 'gemini' | 'deepseek'
 
 export interface AccentInfo {
   label: string
@@ -90,20 +120,15 @@ export const FONTS: Record<FontKey, FontInfo> = {
   serif: { label: 'Serif (Lora)', stack: '"Lora", Georgia, "Times New Roman", serif' },
 }
 
+/** Ajustes de apariencia (la IA va fija en la build: Gemini, sin claves de usuario) */
 export interface Settings {
   mode: ThemeMode
   accent: AccentKey
   font: FontKey
-  aiProvider: AiProvider
-  geminiKey: string
-  deepseekKey: string
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   mode: 'dark',
   accent: 'ambar',
   font: 'redonda',
-  aiProvider: 'gemini',
-  geminiKey: '',
-  deepseekKey: '',
 }

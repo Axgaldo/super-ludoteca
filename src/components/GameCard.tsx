@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Game } from '../types'
-import { DIFFICULTY_CLASSES, DIFFICULTY_LABELS } from '../types'
+import { DIFFICULTY_CLASSES, DIFFICULTY_LABELS, GAME_TAGS } from '../types'
 import { cn, coverGradient, formatDuration, formatPlayersShort, initials } from '../lib/utils'
 import { IconClock, IconUsers } from './icons'
 
@@ -37,6 +37,18 @@ export function GameCard({ game }: { game: Game }) {
 
       <div className="flex flex-1 flex-col gap-2 p-3">
         <h3 className="line-clamp-2 font-bold leading-tight">{game.title}</h3>
+        {game.tags && game.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {game.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className={cn('rounded-full border px-1.5 py-0.5 text-[10px] font-bold', GAME_TAGS[tag].classes)}
+              >
+                {GAME_TAGS[tag].label}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="mt-auto flex items-center gap-3 text-xs text-muted">
           <span className="inline-flex items-center gap-1">
             <IconUsers className="h-3.5 w-3.5" />

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useGames } from '../context/GamesContext'
 import { CATALOG, catalogToDraft, type CatalogGame } from '../data/catalog'
 import type { Difficulty, ForgottenRule, GameDraft } from '../types'
-import { DIFFICULTY_LABELS } from '../types'
+import { DIFFICULTY_LABELS, GAME_TAGS, GAME_TAG_KEYS } from '../types'
 import { cn, formatDuration, formatPlayersShort } from '../lib/utils'
 import { Button, Chip, Field, inputClasses } from '../components/ui'
 import { IconCheck, IconPlus, IconSearch, IconX } from '../components/icons'
@@ -21,6 +21,7 @@ function emptyDraft(): GameDraft {
     playersMax: 4,
     durationMin: 30,
     difficulty: 3,
+    tags: [],
     setup: [''],
     turn: [''],
     endCondition: '',
@@ -210,6 +211,7 @@ export default function GameFormView() {
           playersMax: editing.playersMax,
           durationMin: editing.durationMin,
           difficulty: editing.difficulty,
+          tags: editing.tags ? [...editing.tags] : [],
           setup: [...editing.setup],
           turn: [...editing.turn],
           endCondition: editing.endCondition,
@@ -237,7 +239,7 @@ export default function GameFormView() {
       await saveGame(catalogToDraft(cat), { catalogId: cat.id })
     } catch (err) {
       console.error(err)
-      setSaveError('No se pudo añadir el juego. Inténtalo otra vez.')
+      setSaveError(err instanceof Error ? err.message : 'No se pudo añadir el juego. Inténtalo otra vez.')
     } finally {
       setSaving(false)
     }
@@ -263,6 +265,7 @@ export default function GameFormView() {
       ...draft,
       title: draft.title.trim(),
       image: draft.image?.trim() || undefined,
+      tags: [...new Set(draft.tags ?? [])],
       setup: draft.setup.map((s) => s.trim()).filter(Boolean),
       turn: draft.turn.map((s) => s.trim()).filter(Boolean),
       endCondition: draft.endCondition.trim(),
@@ -279,7 +282,7 @@ export default function GameFormView() {
     } catch (err) {
       console.error(err)
       setSaving(false)
-      setSaveError('No se pudo guardar el juego. Inténtalo otra vez.')
+      setSaveError(err instanceof Error ? err.message : 'No se pudo guardar el juego. Inténtalo otra vez.')
     }
   }
 
@@ -445,6 +448,31 @@ export default function GameFormView() {
                   {DIFFICULTY_LABELS[d]}
                 </Chip>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sm font-bold">Categorías / etiquetas</p>
+            <p className="text-xs text-muted">Aparecen en la ficha y sirven para filtrar tu ludoteca.</p>
+            <div className="flex flex-wrap gap-2">
+              {GAME_TAG_KEYS.map((tag) => {
+                const active = (draft.tags ?? []).includes(tag)
+                return (
+                  <Chip
+                    key={tag}
+                    active={active}
+                    onClick={() =>
+                      patch({
+                        tags: active
+                          ? (draft.tags ?? []).filter((t) => t !== tag)
+                          : [...(draft.tags ?? []), tag],
+                      })
+                    }
+                  >
+                    {GAME_TAGS[tag].label}
+                  </Chip>
+                )
+              })}
             </div>
           </div>
 

@@ -1,15 +1,7 @@
-import type { GameDraft } from '../types'
+import type { CatalogEntry } from './types'
 
-/**
- * Juego del catálogo precargado: una ficha de refresco rápido completa.
- * El usuario selecciona los que tiene y se guardan en su ludoteca.
- */
-export interface CatalogGame extends GameDraft {
-  id: string
-  description: string
-}
-
-export const CATALOG: CatalogGame[] = [
+/** Catálogo clásico: fichas de refresco rápido listas para añadir con un toque. */
+export const CLASICOS: CatalogEntry[] = [
   // ─────────────────────────────────────────────────────────────────────
   {
     id: 'catan',
@@ -263,20 +255,20 @@ export const CATALOG: CatalogGame[] = [
   // ─────────────────────────────────────────────────────────────────────
   {
     id: 'codenames',
-    title: 'Codenames',
-    description: 'Dos spymasters, 25 palabras y un solo código para encontrar a sus agentes.',
+    title: 'Código Secreto (Codenames)',
+    description: 'Dos jefes de red, 25 palabras y un solo código para encontrar a tus agentes.',
     playersMin: 4,
     playersMax: 8,
     durationMin: 15,
     difficulty: 2,
     setup: [
       'Coloca 25 cartas de palabra en la cuadrícula de 5×5.',
-      'El spymaster de cada equipo mira una carta clave que muestra qué palabras son de cada equipo (9 el equipo que empieza, 8 el otro), neutrales (7) y el asesino (1).',
+      'El jefe de red de cada equipo mira una carta clave que muestra qué palabras son de cada equipo (9 el equipo que empieza, 8 el otro), neutrales (7) y el asesino (1).',
       'Los operativos NO pueden ver ninguna carta clave.',
       'Empieza el equipo con 9 palabras.',
     ],
     turn: [
-      '1. El spymaster da una pista: UNA palabra + UN número (el nº de palabras del tablero relacionadas).',
+      '1. El jefe de red da una pista: UNA palabra + UN número (el nº de palabras del tablero relacionadas).',
       '2. Sus operativos debaten en voz alta y tocan 1 palabra: si es de su color, siguen (hasta nº + 1 intentos en total).',
       '3. Si tocan una palabra neutral o del rival, su turno termina (la palabra se cubre con su color correspondiente).',
     ],
@@ -287,8 +279,8 @@ export const CATALOG: CatalogGame[] = [
     forgotten: [
       { title: 'Pistas válidas', text: 'Una palabra + un número. Nada de frases, rimas explicadas, gestos ni miraditas. Palabras compuestas inventadas («azul-cielo») solo si tu grupo las acepta ANTES.' },
       { title: 'Intentos', text: 'Tenéis «número + 1» intentos; podéis parar antes. Cualquier fallo (neutral o rival) termina el turno.' },
-      { title: 'El asesino', text: 'Tocar la palabra asesina pierde la partida al instante (los spymasters deben evitar acercar la pista).' },
-      { title: 'Póker face', text: 'Los spymasters no pueden reaccionar a las decisiones de sus operativos: ni un gesto.' },
+      { title: 'El asesino', text: 'Tocar la palabra asesina pierde la partida al instante (los jefes de red deben evitar acercar la pista).' },
+      { title: 'Póker face', text: 'Los jefes de red no pueden reaccionar a las decisiones de sus operativos: ni un gesto.' },
       { title: 'Turnos encadenados', text: 'Si el turno pasa al otro equipo por tocar su palabra, esa palabra les queda cubierta: ¡beneficio gratis para ellos!' },
     ],
   },
@@ -764,26 +756,3 @@ export const CATALOG: CatalogGame[] = [
   },
 ]
 
-/** Ids de los juegos de ejemplo del Modo Invitado Local. */
-export const DEMO_CATALOG_IDS = ['catan', 'small-world', 'decrypto'] as const
-
-/** Convierte una ficha del catálogo en un borrador editable (copias, sin referencias compartidas). */
-export function catalogToDraft(c: CatalogGame): GameDraft {
-  return {
-    title: c.title,
-    playersMin: c.playersMin,
-    playersMax: c.playersMax,
-    durationMin: c.durationMin,
-    difficulty: c.difficulty,
-    setup: [...c.setup],
-    turn: [...c.turn],
-    endCondition: c.endCondition,
-    scoring: [...c.scoring],
-    forgotten: c.forgotten.map((f) => ({ ...f })),
-  }
-}
-
-/** Busca un juego del catálogo por su id. */
-export function findCatalogGame(id: string): CatalogGame | undefined {
-  return CATALOG.find((c) => c.id === id)
-}

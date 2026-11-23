@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useGames } from '../context/GamesContext'
 import type { Game } from '../types'
-import { DIFFICULTY_CLASSES, DIFFICULTY_LABELS } from '../types'
+import { DIFFICULTY_CLASSES, DIFFICULTY_LABELS, GAME_TAGS } from '../types'
 import { cn, coverGradient, formatDuration, formatPlayers, initials } from '../lib/utils'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { Button, ConfirmDialog } from '../components/ui'
@@ -126,7 +126,7 @@ export default function GameDetailView() {
     } catch (err) {
       console.error(err)
       setDeleting(false)
-      setDeleteError('No se pudo eliminar el juego. Inténtalo otra vez.')
+      setDeleteError(err instanceof Error ? err.message : 'No se pudo eliminar el juego. Inténtalo otra vez.')
     }
   }
 
@@ -181,6 +181,19 @@ export default function GameDetailView() {
             {DIFFICULTY_LABELS[game.difficulty]}
           </span>
         </div>
+
+        {game.tags && game.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {game.tags.map((tag) => (
+              <span
+                key={tag}
+                className={cn('rounded-full border px-2 py-0.5 text-[11px] font-bold', GAME_TAGS[tag].classes)}
+              >
+                {GAME_TAGS[tag].label}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-2">
           <Link to={`/editar/${game.id}`}>
