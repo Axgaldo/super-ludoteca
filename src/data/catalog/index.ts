@@ -2,6 +2,7 @@ import type { GameDraft, GameTag } from '../../types'
 import type { CatalogGame } from './types'
 import { CLASICOS } from './clasicos'
 import { NUEVOS } from './nuevos'
+import { BGG_IMAGES } from './images'
 
 export type { CatalogEntry, CatalogGame } from './types'
 
@@ -49,7 +50,7 @@ const TAGS: Record<string, GameTag[]> = {
   cubitos: ['familiar', 'party'],
   furnace: ['euro', 'estrategia'],
   'terraforming-mars': ['euro', 'estrategia'],
-  'one-round': ['party', 'filler'],
+  'one-round': ['party', 'cooperativo', 'filler'],
   'feed-the-kraken': ['party', 'tematico'],
   'chao-pescao': ['party', 'filler'],
   'wonders-duel-7': ['duelos', 'euro'],
@@ -58,11 +59,16 @@ const TAGS: Record<string, GameTag[]> = {
   'brass-lancashire': ['euro', 'estrategia'],
 }
 
-/** Catálogo completo (44 juegos), con sus etiquetas aplicadas. */
-export const CATALOG: CatalogGame[] = [...CLASICOS, ...NUEVOS].map((entry) => ({
-  ...entry,
-  tags: TAGS[entry.id] ?? [],
-}))
+/** Catálogo completo (44 juegos), con etiquetas y portadas de BGG. */
+export const CATALOG: CatalogGame[] = [...CLASICOS, ...NUEVOS].map((entry) => {
+  const images = BGG_IMAGES[entry.id]
+  return {
+    ...entry,
+    tags: TAGS[entry.id] ?? [],
+    image: entry.image ?? images?.image,
+    imageWide: entry.imageWide ?? images?.imageWide,
+  }
+})
 
 /** Ids de los juegos de ejemplo del Modo Invitado Local. */
 export const DEMO_CATALOG_IDS = ['catan', 'small-world', 'decrypto'] as const
@@ -71,6 +77,8 @@ export const DEMO_CATALOG_IDS = ['catan', 'small-world', 'decrypto'] as const
 export function catalogToDraft(c: CatalogGame): GameDraft {
   return {
     title: c.title,
+    image: c.image,
+    imageWide: c.imageWide,
     playersMin: c.playersMin,
     playersMax: c.playersMax,
     durationMin: c.durationMin,

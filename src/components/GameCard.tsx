@@ -23,6 +23,7 @@ export function GameCard({ game }: { game: Game }) {
             src={game.image}
             alt={`Portada de ${game.title}`}
             loading="lazy"
+            referrerPolicy="no-referrer"
             className="h-full w-full object-cover"
             onError={() => setImageFailed(true)}
           />

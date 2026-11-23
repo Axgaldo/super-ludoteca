@@ -10,3 +10,9 @@ export type CatalogEntry = Omit<GameDraft, 'tags'> & {
 export interface CatalogGame extends CatalogEntry {
   tags: GameTag[]
 }
+
+/** Portada de un juego del catálogo (tarjeta y cabecera ancha). */
+export interface CatalogImage {
+  image: string
+  imageWide: string
+}

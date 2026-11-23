@@ -17,3 +17,6 @@ dev-dist
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Caché de portadas BGG (el resultado real es src/data/catalog/images.ts)
+scripts/bgg-images-progress.json

@@ -207,6 +207,7 @@ export default function GameFormView() {
       ? {
           title: editing.title,
           image: editing.image,
+          imageWide: editing.imageWide,
           playersMin: editing.playersMin,
           playersMax: editing.playersMax,
           durationMin: editing.durationMin,
@@ -265,6 +266,7 @@ export default function GameFormView() {
       ...draft,
       title: draft.title.trim(),
       image: draft.image?.trim() || undefined,
+      imageWide: draft.imageWide?.trim() || undefined,
       tags: [...new Set(draft.tags ?? [])],
       setup: draft.setup.map((s) => s.trim()).filter(Boolean),
       turn: draft.turn.map((s) => s.trim()).filter(Boolean),

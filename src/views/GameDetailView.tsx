@@ -114,7 +114,7 @@ export default function GameDetailView() {
     )
   }
 
-  const showImage = Boolean(game.image) && !heroFailed
+  const showImage = Boolean(game.imageWide ?? game.image) && !heroFailed
 
   async function handleDelete() {
     if (!game) return
@@ -144,9 +144,10 @@ export default function GameDetailView() {
       <div className={cn('relative h-40 overflow-hidden rounded-2xl', !showImage && coverGradient(game.title))}>
         {showImage ? (
           <img
-            src={game.image}
+            src={game.imageWide ?? game.image}
             alt=""
             className="h-full w-full object-cover"
+            referrerPolicy="no-referrer"
             onError={() => setHeroFailed(true)}
           />
         ) : (

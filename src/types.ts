@@ -61,6 +61,8 @@ export interface Game {
   title: string
   /** URL de imagen/portada (opcional: si falta, se genera un degradado con iniciales) */
   image?: string
+  /** Imagen ancha para la cabecera de la ficha (opcional; si falta se usa `image`) */
+  imageWide?: string
   playersMin: number
   playersMax: number
   /** Duración estimada en minutos */
